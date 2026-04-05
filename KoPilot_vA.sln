@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36811.4 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KoPilot_vA", "KoPilot_vA\KoPilot_vA.csproj", "{FFD8D128-94AC-46F6-BBC0-73BF23EDC2E8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FFD8D128-94AC-46F6-BBC0-73BF23EDC2E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFD8D128-94AC-46F6-BBC0-73BF23EDC2E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFD8D128-94AC-46F6-BBC0-73BF23EDC2E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFD8D128-94AC-46F6-BBC0-73BF23EDC2E8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6FCF7B6A-9FD7-4FE1-9764-3D5010CAB081}
+	EndGlobalSection
+EndGlobal
