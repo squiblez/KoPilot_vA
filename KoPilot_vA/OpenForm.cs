@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Text.Json;
 
 namespace KoPilot_vA
 {
@@ -17,10 +16,7 @@ namespace KoPilot_vA
         /// </summary>
         public bool CreateNewProject { get; private set; }
 
-        private static readonly string _recentProjectsPath =
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "KoPilot", "recent.json");
-
+        private AppSettings _appSettings = new();
         private readonly List<string> _recentProjects = new();
 
         public OpenForm()
@@ -37,24 +33,14 @@ namespace KoPilot_vA
             var ver = asm.GetName().Version ?? new Version(1, 0, 0, 0);
             lblVersion.Text = $"Version {ver.Major}.{ver.Minor}.{ver.Build}  \u2022  .NET {Environment.Version}";
 
-            var svc = new KoboldCppService();
-            lblEndpoint.Text = $"AI Endpoint: {svc.EndpointUrl}";
+            lblEndpoint.Text = $"AI Endpoint: {_appSettings.AiEndpointUrl}";
         }
 
         private void LoadRecentProjects()
         {
+            _appSettings = AppSettings.Load();
             _recentProjects.Clear();
-            try
-            {
-                if (File.Exists(_recentProjectsPath))
-                {
-                    var json = File.ReadAllText(_recentProjectsPath);
-                    var list = JsonSerializer.Deserialize<List<string>>(json);
-                    if (list != null)
-                        _recentProjects.AddRange(list);
-                }
-            }
-            catch { }
+            _recentProjects.AddRange(_appSettings.RecentProjects);
         }
 
         private void PopulateRecentList()
@@ -170,17 +156,8 @@ namespace KoPilot_vA
 
         private void SaveRecentProjects()
         {
-            try
-            {
-                var dir = Path.GetDirectoryName(_recentProjectsPath);
-                if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-
-                var json = JsonSerializer.Serialize(_recentProjects,
-                    new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(_recentProjectsPath, json);
-            }
-            catch { }
+            _appSettings.RecentProjects = new List<string>(_recentProjects);
+            _appSettings.Save();
         }
     }
 }

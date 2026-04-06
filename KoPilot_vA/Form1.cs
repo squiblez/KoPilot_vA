@@ -16,9 +16,9 @@ namespace KoPilot_vA
         // Recent projects
         private const int MaxRecentProjects = 10;
         private readonly List<string> _recentProjects = new();
-        private static readonly string _recentProjectsPath =
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "KoPilot", "recent.json");
+
+        // Persistent settings (kopilot.cfg)
+        private AppSettings _appSettings = new();
 
         // Settings state
         private string _editorFontFamily = "Consolas";
@@ -1273,6 +1273,7 @@ namespace KoPilot_vA
                 _dotNetPath = dlg.DotNetSdkPath;
 
                 ApplyEditorSettings();
+                SaveAppSettings();
                 SetStatus("Settings applied");
             }
         }
@@ -1305,6 +1306,7 @@ namespace KoPilot_vA
                 _aiService.Temperature = dlg.Temperature;
                 _aiService.SystemPrompt = dlg.SystemPrompt;
                 _aiService.IsEnabled = dlg.IsEnabled;
+                SaveAppSettings();
                 SetStatus("AI settings updated");
             }
         }
@@ -1637,6 +1639,9 @@ namespace KoPilot_vA
 
         private void Form1_Load(object? sender, EventArgs e)
         {
+            // Load all persisted settings from kopilot.cfg
+            LoadAppSettings();
+
             // Build all menu items in code so the Designer cannot strip them
             SetupMenus();
 
@@ -1650,7 +1655,6 @@ namespace KoPilot_vA
             // AI chat panel width (right side)
             splitCenter.SplitterDistance = splitCenter.Width - 350;
 
-            LoadRecentProjects();
             RefreshRecentProjectsMenu();
 
             // Handle startup actions from OpenForm
@@ -1667,6 +1671,7 @@ namespace KoPilot_vA
         private void Form1_FormClosing(object? sender, FormClosingEventArgs e)
         {
             SaveChatHistory();
+            SaveAppSettings();
             if (!ConfirmCloseCurrentProject())
                 e.Cancel = true;
         }
@@ -1954,35 +1959,54 @@ namespace KoPilot_vA
 
         // ===== RECENT PROJECTS =====
 
-        private void LoadRecentProjects()
+        // ===== APP SETTINGS (kopilot.cfg) =====
+
+        private void LoadAppSettings()
         {
+            _appSettings = AppSettings.Load();
+
+            // Editor settings
+            _editorFontFamily = _appSettings.EditorFontFamily;
+            _editorFontSize = _appSettings.EditorFontSize;
+            _wordWrap = _appSettings.WordWrap;
+            _dotNetPath = _appSettings.DotNetPath;
+
+            // AI settings
+            _aiService.EndpointUrl = _appSettings.AiEndpointUrl;
+            _aiService.MaxTokens = _appSettings.AiMaxTokens;
+            _aiService.ContextLength = _appSettings.AiContextLength;
+            _aiService.Temperature = _appSettings.AiTemperature;
+            if (!string.IsNullOrEmpty(_appSettings.AiSystemPrompt))
+                _aiService.SystemPrompt = _appSettings.AiSystemPrompt;
+            _aiService.IsEnabled = _appSettings.AiEnabled;
+
+            // Recent projects
             _recentProjects.Clear();
-            try
-            {
-                if (File.Exists(_recentProjectsPath))
-                {
-                    var json = File.ReadAllText(_recentProjectsPath);
-                    var list = JsonSerializer.Deserialize<List<string>>(json);
-                    if (list != null)
-                        _recentProjects.AddRange(list);
-                }
-            }
-            catch { }
+            _recentProjects.AddRange(_appSettings.RecentProjects);
+
+            ApplyEditorSettings();
         }
 
-        private void SaveRecentProjects()
+        private void SaveAppSettings()
         {
-            try
-            {
-                var dir = Path.GetDirectoryName(_recentProjectsPath);
-                if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
+            // Editor settings
+            _appSettings.EditorFontFamily = _editorFontFamily;
+            _appSettings.EditorFontSize = _editorFontSize;
+            _appSettings.WordWrap = _wordWrap;
+            _appSettings.DotNetPath = _dotNetPath;
 
-                var json = JsonSerializer.Serialize(_recentProjects,
-                    new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(_recentProjectsPath, json);
-            }
-            catch { }
+            // AI settings
+            _appSettings.AiEndpointUrl = _aiService.EndpointUrl;
+            _appSettings.AiMaxTokens = _aiService.MaxTokens;
+            _appSettings.AiContextLength = _aiService.ContextLength;
+            _appSettings.AiTemperature = _aiService.Temperature;
+            _appSettings.AiSystemPrompt = _aiService.SystemPrompt;
+            _appSettings.AiEnabled = _aiService.IsEnabled;
+
+            // Recent projects
+            _appSettings.RecentProjects = new List<string>(_recentProjects);
+
+            _appSettings.Save();
         }
 
         private void AddToRecentProjects(string projectFilePath)
@@ -1996,7 +2020,7 @@ namespace KoPilot_vA
             while (_recentProjects.Count > MaxRecentProjects)
                 _recentProjects.RemoveAt(_recentProjects.Count - 1);
 
-            SaveRecentProjects();
+            SaveAppSettings();
             RefreshRecentProjectsMenu();
         }
 
@@ -2025,7 +2049,7 @@ namespace KoPilot_vA
             clearItem.Click += (_, _) =>
             {
                 _recentProjects.Clear();
-                SaveRecentProjects();
+                SaveAppSettings();
                 RefreshRecentProjectsMenu();
             };
             mnuRecentProjects.DropDownItems.Add(clearItem);
@@ -2040,7 +2064,7 @@ namespace KoPilot_vA
                 MessageBox.Show($"Project file not found:\n{path}", "Recent Projects",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 _recentProjects.Remove(path);
-                SaveRecentProjects();
+                SaveAppSettings();
                 RefreshRecentProjectsMenu();
                 return;
             }

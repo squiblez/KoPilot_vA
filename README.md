@@ -1,5 +1,4 @@
 ﻿# KoPilot IDE
-# KoPilot IDE
 
 **A lightweight, AI-powered Integrated Development Environment for C# — built for fun, built with AI, and open source.**
 
@@ -26,7 +25,7 @@ Most AI-powered coding tools are cloud-dependent plugins for heavyweight IDEs. K
 
 ### Code Editor
 
-![Code Editor](KoPilot_vA/Screens/KPEW.png)
+![Code Editor](KoPilot_vA/Screens/KPIE.png)
 
 - **Tabbed editor** with support for multiple open files simultaneously
 - **Roslyn-powered syntax highlighting** — real semantic colorization using the .NET Compiler Platform, not regex-based approximations
@@ -40,7 +39,7 @@ Most AI-powered coding tools are cloud-dependent plugins for heavyweight IDEs. K
 
 ### AI Assistant
 
-![AI-Powered IDE](KoPilot_vA/Screens/KPIE.png)
+![AI-Powered IDE](KoPilot_vA/Screens/KPEW.png)
 
 - **Integrated AI chat panel** — ask questions, request code changes, or have the AI generate entire files without leaving the IDE
 - **Full project context** — the AI receives your complete project source code with every request, so it understands your codebase holistically
